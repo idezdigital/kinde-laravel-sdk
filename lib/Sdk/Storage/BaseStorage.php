@@ -19,7 +19,7 @@ class BaseStorage
 
     public static function getItem(string $key)
     {
-        return $_COOKIE[self::getKey($key)] ?? "";
+        return request()->cookies->get(self::getKey($key));
     }
 
     public static function setItem(
@@ -32,18 +32,14 @@ class BaseStorage
         bool $httpOnly = false
     ) {
         $newKey = self::getKey($key);
-        $_COOKIE[$newKey] = $value;
-        setcookie($newKey, $value, $expires_or_options, $path, $domain, $secure, $httpOnly);
+
+        cookie()->queue($newKey, $value, $expires_or_options, $path, $domain, $secure, $httpOnly);
     }
 
     public static function removeItem(string $key)
     {
         $newKey = self::getKey($key);
-        if (isset($_COOKIE[$newKey])) {
-            unset($_COOKIE[$newKey]);
-            self::setItem($key, "", -1);
-        }
-        self::setItem($key, "", -1);
+        cookie()->forget($newKey);
     }
 
     public static function clear()

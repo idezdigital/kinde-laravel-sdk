@@ -72,7 +72,7 @@ class Storage extends BaseStorage
 
     static function setState($newState)
     {
-        return self::setItem(StorageEnums::STATE, $newState, time() + 3600 * 2); // expired in 2hrs
+         return self::setItem(StorageEnums::STATE, $newState, time() + 3600 * 2); // expired in 2hrs
     }
 
     static function getCodeVerifier()
