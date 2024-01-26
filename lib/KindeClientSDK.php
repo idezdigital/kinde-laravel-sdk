@@ -7,6 +7,7 @@ if (session_status() != PHP_SESSION_ACTIVE) {
 }
 
 use Exception;
+use Illuminate\Http\RedirectResponse;
 use InvalidArgumentException;
 use GuzzleHttp\Client;
 use Kinde\KindeSDK\Sdk\OAuth2\PKCE;
@@ -145,8 +146,6 @@ class KindeClientSDK
      *
      * @param array additionalParameters The array includes params to pass api.
      * @param string scopes The scopes you want to request.
-     * 
-     * @return The login method returns an array with the following keys:
      */
     public function login(
         array $additionalParameters = []
@@ -165,7 +164,6 @@ class KindeClientSDK
                     return $auth->authenticate($this, 'login', $additionalParameters);
                 default:
                     throw new InvalidArgumentException("Please provide correct grant_type");
-                    break;
             }
         } catch (\Throwable $th) {
             throw $th;
@@ -201,15 +199,13 @@ class KindeClientSDK
     /**
      * It unset's the token from the storage and redirects the user to the logout endpoint
      */
-    public function logout()
+    public function logout(): RedirectResponse
     {
         $this->cleanStorage();
 
-        $searchParams = [
-            'redirect' => $this->logoutRedirectUri
-        ];
-        header('Location: ' . $this->logoutEndpoint . '?' . http_build_query($searchParams));
-        exit();
+        $params = ['redirect' => $this->logoutRedirectUri];
+
+        return redirect("$this->logoutEndpoint?" . http_build_query($params));
     }
 
     /**
@@ -239,9 +235,7 @@ class KindeClientSDK
             'response_type' => 'code'
         ];
 
-        $url = $this->getProtocol() . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
-        $urlComponents = parse_url($url);
-        parse_str($urlComponents['query'] ?? "", $params);
+        $params = request()->query();
         $stateServer = $params['state'] ?? null;
 
         $this->checkStateAuthentication($stateServer);
@@ -578,15 +572,6 @@ class KindeClientSDK
     private function cleanStorage()
     {
         $this->storage->clear();
-    }
-
-    private function getProtocol()
-    {
-        if (!empty($this->protocol)) {
-            return $this->protocol;
-        }
-
-        return isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
     }
 
     private function checkStateAuthentication(string $stateServer)

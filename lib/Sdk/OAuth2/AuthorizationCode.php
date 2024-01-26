@@ -2,10 +2,10 @@
 
 namespace Kinde\KindeSDK\Sdk\OAuth2;
 
-use Kinde\KindeSDK\Sdk\Enums\GrantType;
-use Kinde\KindeSDK\Sdk\Utils\Utils;
 use Kinde\KindeSDK\KindeClientSDK;
+use Kinde\KindeSDK\Sdk\Enums\GrantType;
 use Kinde\KindeSDK\Sdk\Storage\Storage;
+use Kinde\KindeSDK\Sdk\Utils\Utils;
 
 class AuthorizationCode
 {
@@ -14,7 +14,7 @@ class AuthorizationCode
      */
     protected $storage;
 
-    function __construct()
+    public function __construct()
     {
         $this->storage = Storage::getInstance();
     }
@@ -34,8 +34,7 @@ class AuthorizationCode
         ];
         $mergedAdditionalParameters = Utils::addAdditionalParameters($clientSDK->additionalParameters, $additionalParameters);
         $searchParams = array_merge($searchParams, $mergedAdditionalParameters);
-        if (!headers_sent()) {
-            exit(header('Location: ' . $clientSDK->authorizationEndpoint . '?' . http_build_query($searchParams)));
-        }
+
+        return redirect($clientSDK->authorizationEndpoint . '?' . http_build_query($searchParams));
     }
 }
