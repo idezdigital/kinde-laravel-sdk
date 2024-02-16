@@ -12,7 +12,7 @@ class BaseStorage
     static function getStorage()
     {
         if (empty(self::$storage)) {
-            self::$storage = $_COOKIE['kinde'];
+            self::$storage = request()->cookies;
         }
         return self::$storage;
     }
@@ -33,13 +33,13 @@ class BaseStorage
     ) {
         $newKey = self::getKey($key);
 
-        cookie()->queue($newKey, $value, $expires_or_options, $path, $domain, $secure, $httpOnly);
+        request()->cookies->set($newKey, $value);
     }
 
     public static function removeItem(string $key)
     {
         $newKey = self::getKey($key);
-        cookie()->forget($newKey);
+        request()->cookies->remove($newKey);
     }
 
     public static function clear()
